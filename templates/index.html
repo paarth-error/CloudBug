@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Cloud Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f7f6;
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 240px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+        .sidebar-nav {
+            flex-grow: 1;
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            margin: 0;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #ecf0f1;
+            transition: background 0.2s;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: #34495e;
+            color: #ffffff;
+        }
+        
+        /* --- Main Content Wrapper --- */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Allows content to scroll */
+        }
+
+        /* --- Top Header --- */
+        .header {
+            background: #ffffff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .user-info {
+            color: #555;
+        }
+        .user-info a {
+            color: #e74c3c;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        /* --- Page Content --- */
+        .content {
+            padding: 30px;
+            flex-grow: 1;
+        }
+        
+        /* --- Re-styled Components --- */
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        .bug-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #fdfdfd;
+        }
+        .bug-card h3 {
+            margin-top: 0;
+            color: #007BFF; /* Link color from your plan */
+        }
+        .bug-card .status {
+            font-style: italic;
+            color: #555;
+            font-size: 0.9em;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: calc(100% - 20px); /* Adjust for padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        
+        /* --- Flash Messages --- */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            Bug Tracker
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('index') }}" class="active">🏠 Home</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            
+            {% if current_user.role == 'Admin' %}
+            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            {% endif %}
+            
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+    
+        <header class="header">
+            <div class="user-info">
+                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </header>
+
+        <main class="content">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        
+            <h1>Project Dashboard</h1>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Projects</h2>
+                    {% if current_user.role == 'Admin' %}
+                    <button class="btn btn-primary" onclick="openModal()">New Project</button>
+                    {% endif %}
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Description</th>
+                            <th>Team Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="link-purple">
+                                    {{ project.name }}
+                                </a>
+                            </td>
+                            <td>{{ project.description }}</td>
+                            <td>{{ project.team|length }} members</td>
+                            <td>
+                                <button class="btn-secondary">Details</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4">No projects found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>Ticket Statistics</h2>
+                <p>(Lower part: Ticket related statistics will go here)</p>
+            </div>
+        
+        </main>
+        
+        {% if current_user.role == 'Admin' %}
+        <div id="newProjectModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2>Create New Project</h2>
+                <form action="{{ url_for('create_project') }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Project Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="team_members">Assign Team:</label>
+                        <select id="team_members" name="team_members" multiple size="5">
+                            {% for user in all_users %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                            {% endfor %}
+                        </select>
+                        <small>Hold Ctrl/Cmd to select multiple users.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        
+        
+        <style>
+            .card-header { display: flex; justify-content: space-between; align-items: center; }
+            .btn { padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.9em; }
+            .btn-primary { background: #007BFF; color: white; }
+            .btn-secondary { background: #6c757d; color: white; }
+            .link-purple { color: #6f42c1; font-weight: bold; text-decoration: none; }
+            .link-purple:hover { text-decoration: underline; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: #f9f9f9; }
+            
+            /* --- Modal Styles --- */
+            .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+            .modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; }
+            .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+            .close-btn:hover, .close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
+            .form-group { margin-bottom: 15px; }
+            .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+            .form-group input, .form-group textarea, .form-group select { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+            .form-group select[multiple] { height: 120px; }
+        </style>
+        
+        <script>
+            function openModal() {
+                document.getElementById('newProjectModal').style.display = 'block';
+            }
+            function closeModal() {
+                document.getElementById('newProjectModal').style.display = 'none';
+            }
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('newProjectModal')) {
+                    closeModal();
+                }
+            }
+        </script>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} - Tickets</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7f6; display: flex; height: 100vh; }
+        .sidebar { width: 240px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; font-size: 1.5em; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; }
+        .sidebar-nav { flex-grow: 1; list-style: none; padding: 20px 0; margin: 0; }
+        .sidebar-nav li { margin: 0; }
+        .sidebar-nav a { display: block; padding: 15px 20px; text-decoration: none; color: #ecf0f1; transition: background 0.2s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: #34495e; color: #ffffff; }
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .header { background: #ffffff; padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .user-info { color: #555; }
+        .user-info a { color: #e74c3c; text-decoration: none; margin-left: 15px; font-weight: bold; }
+        .content { padding: 30px; flex-grow: 1; }
+        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .bug-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #fdfdfd; }
+        .bug-card h3 { margin-top: 0; color: #6f42c1; } /* Purple link */
+        .bug-card .status { font-style: italic; color: #555; font-size: 0.9em; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea { width: 95%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        button, .btn { background: #007BFF; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+        /* Add this to the <style> block in project_detail.html */
+        .link-purple a {
+        color: #6f42c1;
+        font-weight: bold;
+        text-decoration: none;
+    }
+        .link-purple a:hover {
+            text-decoration: underline;
+        }
+        /* Add modal styles if you plan to use a modal for new tickets */
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            Bug Tracker
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('index') }}" class="active">🏠 Home</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            
+            {% if current_user.role == 'Admin' %}
+            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+    
+        <header class="header">
+            <div class="user-info">
+                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </header>
+
+        <main class="content">
+        
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <h1>Project: {{ project.name }}</h1>
+            <p>{{ project.description }}</p>
+            
+            <div class="card">
+                <h2>Submit a New Ticket</h2>
+                <form action="{{ url_for('project_detail', project_id=project.id) }}" method="POST">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" required>
+                    
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="3"></textarea>
+                    
+                    <button type="submit">Submit Ticket</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Tickets</h2>
+                <div class="bug-list">
+                    {% for ticket in tickets %}
+                        <div class="bug-card">
+                            <h3 class="link-purple">
+                                <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">
+                                    {{ ticket.title }}
+                                </a>
+                            </h3>
+                            <p>{{ ticket.description }}</p>
+                            <p class="status">
+                                <strong>Status:</strong> {{ ticket.status }} | 
+                                <strong>Reported by:</strong> {{ ticket.author.username }} |
+                                <strong>On:</strong> {{ ticket.created_at.strftime('%Y-%m-%d') }}
+                            </p>
+                        </div>
+                    {% else %}
+                        <p>No tickets found for this project.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+</body>
+</html>

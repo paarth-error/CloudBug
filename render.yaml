@@ -1,0 +1,26 @@
+services:
+  # 1. The PostgreSQL Database
+  - type: pserv
+    name: bug-tracker-db
+    plan: free # Free tier database
+    databaseName: bug_tracker
+    user: bug_tracker_user
+
+  # 2. The Python Web Service
+  - type: web
+    name: bug-tracker-app
+    plan: free # Free tier web server
+    runtime: python
+    pythonVersion: 3.8 # Matches your local python3 version
+    buildCommand: "pip install -r requirements.txt"
+    preDeployCommand: "python3 app.py create" # This runs our create function!
+    startCommand: "gunicorn 'app:app'"
+    envVars:
+      - key: DATABASE_URL
+        # This line automatically gets the connection string from the database above
+        fromDatabase:
+          name: bug-tracker-db
+          property: connectionString
+      - key: SECRET_KEY
+        # This generates a random, secure secret key on deploy
+        generateValue: true

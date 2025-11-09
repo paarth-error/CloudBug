@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket: {{ ticket.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7f6; display: flex; height: 100vh; }
+        .sidebar { width: 240px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; font-size: 1.5em; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; }
+        .sidebar-nav { flex-grow: 1; list-style: none; padding: 20px 0; margin: 0; }
+        .sidebar-nav li { margin: 0; }
+        .sidebar-nav a { display: block; padding: 15px 20px; text-decoration: none; color: #ecf0f1; transition: background 0.2s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: #34495e; color: #ffffff; }
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .header { background: #ffffff; padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .user-info { color: #555; }
+        .user-info a { color: #e74c3c; text-decoration: none; margin-left: 15px; font-weight: bold; }
+        .content { padding: 30px; flex-grow: 1; }
+        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea, select { width: 95%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        select[multiple] { height: 120px; }
+        button, .btn { background: #007BFF; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+        
+        /* --- Ticket Detail Specific Styles --- */
+        .ticket-layout { display: flex; gap: 30px; }
+        .ticket-main { flex: 2; }
+        .ticket-sidebar { flex: 1; }
+        .comment { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .comment-author { font-weight: bold; color: #333; }
+        .comment-date { font-size: 0.85em; color: #777; }
+        .comment-body { margin-top: 5px; }
+        .history-item { font-size: 0.9em; color: #555; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">Bug Tracker</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('index') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            {% if current_user.role == 'Admin' %}
+            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+    
+        <header class="header">
+            <div class="user-info">
+                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </header>
+
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <h1>{{ ticket.title }}</h1>
+            <p>
+                Reported by <strong>{{ ticket.author.username }}</strong> in project 
+                <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a>.
+            </p>
+
+            <div class="ticket-layout">
+                <div class="ticket-main">
+                    <div class="card">
+                        <h2>Description</h2>
+                        <p>{{ ticket.description }}</p>
+                    </div>
+
+                    <div class="card">
+                        <h2>Comments</h2>
+                        {% for comment in ticket.comments|sort(attribute='created_at') %}
+                        <div class="comment">
+                            <span class="comment-author">{{ comment.author.username }}</span>
+                            <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            <div class="comment-body">{{ comment.body }}</div>
+                        </div>
+                        {% else %}
+                        <p>No comments yet.</p>
+                        {% endfor %}
+
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <form action="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" method="POST">
+                            <div class="form-group">
+                                <label for="body">Add a Comment:</label>
+                                <textarea id="body" name="body" rows="4" required></textarea>
+                            </div>
+                            <button type="submit">Add Comment</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="ticket-sidebar">
+                    <div class="card">
+                        <h2>Details</h2>
+                        <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="POST">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select id="status" name="status">
+                                    <option value="New" {% if ticket.status == 'New' %}selected{% endif %}>New</option>
+                                    <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                    <option value="Closed" {% if ticket.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="assigned_developers">Assigned Team</label>
+                                <select id="assigned_developers" name="assigned_developers" multiple size="5">
+                                    {% for user in project_team %}
+                                        <option value="{{ user.id }}" 
+                                            {% if user in ticket.assigned_developers %}selected{% endif %}>
+                                            {{ user.username }} ({{ user.role }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small>Hold Ctrl/Cmd to select multiple.</small>
+                            </div>
+                            <button type="submit" class="btn">Update Ticket</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h2>History</h2>
+                        <div class="history-list">
+                            {% for item in ticket.history|sort(attribute='changed_at', reverse=true) %}
+                            <div class="history-item">
+                                <strong>{{ item.user.username }}</strong>
+                                {% if item.field == 'Comment' %}
+                                    added a comment.
+                                {% else %}
+                                    changed <strong>{{ item.field }}</strong> from "{{ item.old_value }}" to "{{ item.new_value }}".
+                                {% endif %}
+                                <div class="comment-date">{{ item.changed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </div>
+                            {% endfor %}
+                            <div class="history-item">
+                                <strong>{{ ticket.author.username }}</strong> created this ticket.
+                                <div class="comment-date">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
