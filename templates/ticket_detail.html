@@ -4,63 +4,213 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket: {{ ticket.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7f6; display: flex; height: 100vh; }
-        .sidebar { width: 240px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; font-size: 1.5em; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar-nav { flex-grow: 1; list-style: none; padding: 20px 0; margin: 0; }
-        .sidebar-nav li { margin: 0; }
-        .sidebar-nav a { display: block; padding: 15px 20px; text-decoration: none; color: #ecf0f1; transition: background 0.2s; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: #34495e; color: #ffffff; }
-        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .header { background: #ffffff; padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .user-info { color: #555; }
-        .user-info a { color: #e74c3c; text-decoration: none; margin-left: 15px; font-weight: bold; }
-        .content { padding: 30px; flex-grow: 1; }
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], textarea, select { width: 95%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
-        select[multiple] { height: 120px; }
-        button, .btn { background: #007BFF; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-info { background: #d1ecf1; color: #0c5460; }
+        /* --- Reset & Base Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* --- Ticket Detail Specific Styles --- */
-        .ticket-layout { display: flex; gap: 30px; }
-        .ticket-main { flex: 2; }
-        .ticket-sidebar { flex: 1; }
-        .comment { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .comment-author { font-weight: bold; color: #333; }
-        .comment-date { font-size: 0.85em; color: #777; }
-        .comment-body { margin-top: 5px; }
-        .history-item { font-size: 0.9em; color: #555; margin-bottom: 8px; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            height: 100vh; 
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- Background Animation --- */
+        .circles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1;
+        }
+        .circles li {
+            position: absolute; display: block; list-style: none;
+            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
+        }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        
+        @keyframes animate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- SIDEBAR (Consistent) --- */
+        .sidebar { 
+            width: 280px; 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; flex-direction: column; 
+            z-index: 10;
+            padding-top: 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header { 
+            padding: 20px 30px; font-size: 1.8rem; font-weight: 700; 
+            color: #fff; display: flex; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header i { color: #00ff88; margin-right: 15px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.5)); }
+        
+        .sidebar-nav { list-style: none; padding: 0 15px; }
+        .sidebar-nav li { margin-bottom: 10px; }
+        
+        .sidebar-nav a { 
+            display: flex; align-items: center; padding: 14px 20px; 
+            text-decoration: none; color: rgba(255, 255, 255, 0.8); 
+            font-weight: 500; border-radius: 15px; transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .sidebar-nav a i { width: 24px; margin-right: 12px; font-size: 1.1em; transition: 0.3s; }
+
+        .sidebar-nav a:hover { 
+            background: rgba(0, 255, 136, 0.15); color: #00ff88; transform: translateX(5px);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+        .sidebar-nav a:hover i { transform: scale(1.1); color: #00ff88; }
+
+        .sidebar-nav a.active { 
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.05) 100%);
+            color: #fff; border-left: 4px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        .sidebar-nav a.active i { color: #00ff88; filter: drop-shadow(0 0 5px rgba(0,255,136,0.6)); }
+
+        /* --- Main Layout --- */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { 
+            padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px; border-radius: 30px; margin-right: 15px; display: flex; align-items: center;
+        }
+        .logout-btn { 
+            color: #ff6b6b; text-decoration: none; padding: 8px 20px; font-weight: 600;
+            border: 1px solid rgba(255, 107, 107, 0.5); border-radius: 30px; transition: 0.3s; 
+        }
+        .logout-btn:hover { background: #ff6b6b; color: white; box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+
+        /* --- Content Area --- */
+        .content { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        
+        h1 { font-weight: 600; margin-bottom: 5px; font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .sub-header { color: rgba(255,255,255,0.7); margin-bottom: 30px; font-size: 0.95rem; }
+        .sub-header a { color: #00ff88; text-decoration: none; font-weight: 600; }
+        .sub-header a:hover { text-decoration: underline; }
+
+        /* --- Layout Grid --- */
+        .ticket-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Left is 2x wider */
+            gap: 30px;
+        }
+        @media(max-width: 900px) { .ticket-layout { grid-template-columns: 1fr; } }
+
+        /* --- Glass Cards --- */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .card h2 { color: #00ff88; font-size: 1.3rem; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; }
+        .card h2 i { margin-right: 10px; }
+        .card p { color: #eee; line-height: 1.6; }
+
+        /* --- Comments Section --- */
+        .comment-list { max-height: 400px; overflow-y: auto; padding-right: 10px; }
+        .comment { 
+            margin-bottom: 15px; padding: 15px; 
+            background: rgba(0, 0, 0, 0.2); border-radius: 15px; border-bottom-left-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .comment-author { font-weight: 600; color: #00ff88; }
+        .comment-date { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+        .comment-body { font-size: 0.95rem; color: #fff; }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #ccc; }
+        
+        textarea, select { 
+            width: 100%; padding: 12px; 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 10px; color: #fff; outline: none; font-family: 'Poppins', sans-serif;
+        }
+        textarea:focus, select:focus { border-color: #00ff88; background: rgba(255,255,255,0.15); }
+        select option { background: #333; color: white; } /* Fix for glass dropdowns */
+
+        button {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            color: white; padding: 10px 20px; border: none; border-radius: 30px;
+            cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 239, 125, 0.5); }
+
+        /* --- History Timeline --- */
+        .history-list { position: relative; padding-left: 20px; border-left: 2px solid rgba(255,255,255,0.1); }
+        .history-item { margin-bottom: 20px; position: relative; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+        .history-item::before {
+            content: ''; position: absolute; left: -26px; top: 5px;
+            width: 10px; height: 10px; background: #00ff88; border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,255,136,0.5);
+        }
+        .history-item strong { color: #fff; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        
+        /* Alerts */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        .alert-success { background: rgba(46, 204, 113, 0.8); border-left: 5px solid #27ae60; }
+        .alert-danger { background: rgba(231, 76, 60, 0.8); border-left: 5px solid #c0392b; }
     </style>
 </head>
 <body>
 
+    <ul class="circles">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ul>
+
     <nav class="sidebar">
-        <div class="sidebar-header">Bug Tracker</div>
+        <div class="sidebar-header">
+            <i class="fas fa-bug"></i> BugTracker
+        </div>
         <ul class="sidebar-nav">
-            <li><a href="{{ url_for('index') }}">🏠 Home</a></li>
-            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}"><i class="fas fa-ticket-alt"></i> Assigned Tickets</a></li>
             {% if current_user.role == 'Admin' %}
-            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
-            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            <li><a href="{{ url_for('user_management') }}"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}"><i class="fas fa-scroll"></i> System Logs</a></li>
             {% endif %}
         </ul>
     </nav>
 
     <div class="main-wrapper">
-    
         <header class="header">
-            <div class="user-info">
-                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
-                <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="user-badge">
+                <i class="fas fa-user-circle" style="margin-right: 8px; font-size: 1.2em;"></i>
+                {{ current_user.username }} <small style="margin-left:5px; opacity:0.7">({{ current_user.role }})</small>
             </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </header>
 
         <main class="content">
@@ -72,45 +222,52 @@
               {% endif %}
             {% endwith %}
 
-            <h1>{{ ticket.title }}</h1>
-            <p>
-                Reported by <strong>{{ ticket.author.username }}</strong> in project 
-                <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a>.
+            <h1><i class="fas fa-ticket-alt" style="color: #00ff88; margin-right: 10px;"></i>{{ ticket.title }}</h1>
+            <p class="sub-header">
+                <i class="fas fa-user"></i> Reported by <strong>{{ ticket.author.username }}</strong> in project 
+                <i class="fas fa-folder-open" style="margin-left:10px;"></i> <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.name }}</a>
             </p>
 
             <div class="ticket-layout">
+                
                 <div class="ticket-main">
                     <div class="card">
-                        <h2>Description</h2>
+                        <h2><i class="fas fa-align-left"></i> Description</h2>
                         <p>{{ ticket.description }}</p>
                     </div>
 
                     <div class="card">
-                        <h2>Comments</h2>
-                        {% for comment in ticket.comments|sort(attribute='created_at') %}
-                        <div class="comment">
-                            <span class="comment-author">{{ comment.author.username }}</span>
-                            <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                            <div class="comment-body">{{ comment.body }}</div>
+                        <h2><i class="fas fa-comments"></i> Discussion</h2>
+                        
+                        <div class="comment-list">
+                            {% for comment in ticket.comments|sort(attribute='created_at') %}
+                            <div class="comment">
+                                <div class="comment-header">
+                                    <span class="comment-author"><i class="fas fa-user-astronaut"></i> {{ comment.author.username }}</span>
+                                    <span class="comment-date">{{ comment.created_at.strftime('%d %b, %H:%M') }}</span>
+                                </div>
+                                <div class="comment-body">{{ comment.body }}</div>
+                            </div>
+                            {% else %}
+                            <p style="text-align:center; opacity:0.6; padding:20px;">No comments yet. Be the first!</p>
+                            {% endfor %}
                         </div>
-                        {% else %}
-                        <p>No comments yet.</p>
-                        {% endfor %}
 
-                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+                        
                         <form action="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" method="POST">
                             <div class="form-group">
-                                <label for="body">Add a Comment:</label>
-                                <textarea id="body" name="body" rows="4" required></textarea>
+                                <label for="body">Add a Comment</label>
+                                <textarea id="body" name="body" rows="3" placeholder="Type your comment here..." required></textarea>
                             </div>
-                            <button type="submit">Add Comment</button>
+                            <button type="submit"><i class="fas fa-paper-plane"></i> Post Comment</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="ticket-sidebar">
                     <div class="card">
-                        <h2>Details</h2>
+                        <h2><i class="fas fa-cog"></i> Update Ticket</h2>
                         <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="POST">
                             <div class="form-group">
                                 <label for="status">Status</label>
@@ -126,35 +283,34 @@
                                 <label for="assigned_developers">Assigned Team</label>
                                 <select id="assigned_developers" name="assigned_developers" multiple size="5">
                                     {% for user in project_team %}
-                                        <option value="{{ user.id }}" 
-                                            {% if user in ticket.assigned_developers %}selected{% endif %}>
+                                        <option value="{{ user.id }}" {% if user in ticket.assigned_developers %}selected{% endif %}>
                                             {{ user.username }} ({{ user.role }})
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <small>Hold Ctrl/Cmd to select multiple.</small>
+                                <small style="color:rgba(255,255,255,0.5); font-size:0.8rem;">Hold Ctrl/Cmd to select multiple.</small>
                             </div>
-                            <button type="submit" class="btn">Update Ticket</button>
+                            <button type="submit"><i class="fas fa-save"></i> Update Details</button>
                         </form>
                     </div>
 
                     <div class="card">
-                        <h2>History</h2>
+                        <h2><i class="fas fa-history"></i> Activity Log</h2>
                         <div class="history-list">
                             {% for item in ticket.history|sort(attribute='changed_at', reverse=true) %}
                             <div class="history-item">
                                 <strong>{{ item.user.username }}</strong>
                                 {% if item.field == 'Comment' %}
-                                    added a comment.
+                                    posted a comment.
                                 {% else %}
-                                    changed <strong>{{ item.field }}</strong> from "{{ item.old_value }}" to "{{ item.new_value }}".
+                                    changed <strong>{{ item.field }}</strong> to <span style="color:#00ff88">{{ item.new_value }}</span>.
                                 {% endif %}
-                                <div class="comment-date">{{ item.changed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div style="font-size: 0.75rem; opacity: 0.6; margin-top:3px;">{{ item.changed_at.strftime('%d %b, %H:%M') }}</div>
                             </div>
                             {% endfor %}
                             <div class="history-item">
                                 <strong>{{ ticket.author.username }}</strong> created this ticket.
-                                <div class="comment-date">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div style="font-size: 0.75rem; opacity: 0.6; margin-top:3px;">{{ ticket.created_at.strftime('%d %b, %H:%M') }}</div>
                             </div>
                         </div>
                     </div>
@@ -162,5 +318,6 @@
             </div>
         </main>
     </div>
+
 </body>
 </html>
