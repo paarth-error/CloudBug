@@ -8,6 +8,7 @@ flask-sqlalchemy==3.1.1
 gunicorn==23.0.0
 importlib-metadata==8.5.0
 itsdangerous==2.2.0
+psycopg2-binary
 jinja2==3.1.6
 MarkupSafe==2.1.5
 packaging==25.0
