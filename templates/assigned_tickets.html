@@ -3,72 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assigned Tickets - Cloud Bug Tracker</title>
+    <title>Assigned Tickets - BugTracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7f6; display: flex; height: 100vh; }
-        .sidebar { width: 240px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; font-size: 1.5em; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar-nav { flex-grow: 1; list-style: none; padding: 20px 0; margin: 0; }
-        .sidebar-nav li { margin: 0; }
-        .sidebar-nav a { display: block; padding: 15px 20px; text-decoration: none; color: #ecf0f1; transition: background 0.2s; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: #34495e; color: #ffffff; }
-        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .header { background: #ffffff; padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .user-info { color: #555; }
-        .user-info a { color: #e74c3c; text-decoration: none; margin-left: 15px; font-weight: bold; }
-        .content { padding: 30px; flex-grow: 1; }
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 25px; overflow-x: auto; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
+        /* --- Reset & Base Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* --- Table & Link Styles --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
-        th { background-color: #f9f9f9; }
-        .link-purple a { color: #6f42c1; font-weight: bold; text-decoration: none; }
-        .link-purple a:hover { text-decoration: underline; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            /* CONSISTENT BACKGROUND (Same as Login/Register) */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            height: 100vh; 
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- Animated Background Circles (Consistent) --- */
+        .circles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1;
+        }
+        .circles li {
+            position: absolute; display: block; list-style: none;
+            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
+        }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        
+        @keyframes animate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- SIDEBAR (Glass + Neon Green Hover) --- */
+        .sidebar { 
+            width: 280px; 
+            background: rgba(255, 255, 255, 0.1); /* Glass effect matching Login form */
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; flex-direction: column; 
+            z-index: 10;
+            padding-top: 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header { 
+            padding: 20px 30px; 
+            font-size: 1.8rem; font-weight: 700; 
+            color: #fff;
+            display: flex; align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header i { 
+            color: #00ff88; /* Green Icon */
+            margin-right: 15px; 
+            filter: drop-shadow(0 0 5px rgba(0,255,136,0.5));
+        }
+        
+        .sidebar-nav { list-style: none; padding: 0 15px; }
+        .sidebar-nav li { margin-bottom: 10px; }
+        
+        /* Link Styles */
+        .sidebar-nav a { 
+            display: flex; align-items: center;
+            padding: 14px 20px; 
+            text-decoration: none; 
+            color: rgba(255, 255, 255, 0.8); 
+            font-weight: 500;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .sidebar-nav a i { 
+            width: 24px; margin-right: 12px; font-size: 1.1em; transition: 0.3s;
+        }
+
+        /* 🟢 Hover Effect: Green Background Tint + Green Text */
+        .sidebar-nav a:hover { 
+            background: rgba(0, 255, 136, 0.15); 
+            color: #00ff88; 
+            transform: translateX(5px);
+            border-color: rgba(0, 255, 136, 0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .sidebar-nav a:hover i { transform: scale(1.1); color: #00ff88; }
+
+        /* 🟢 Active Effect: Solid Highlight */
+        .sidebar-nav a.active { 
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.05) 100%);
+            color: #fff;
+            border-left: 4px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        .sidebar-nav a.active i { color: #00ff88; filter: drop-shadow(0 0 5px rgba(0,255,136,0.6)); }
+
+        /* --- Main Layout --- */
+        .main-wrapper { 
+            flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; 
+        }
+        .header { 
+            padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px; border-radius: 30px; margin-right: 15px; display: flex; align-items: center;
+        }
+        .logout-btn { 
+            color: #ff6b6b; text-decoration: none; padding: 8px 20px; font-weight: 600;
+            border: 1px solid rgba(255, 107, 107, 0.5); border-radius: 30px; transition: 0.3s; 
+        }
+        .logout-btn:hover { background: #ff6b6b; color: white; box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+
+        /* --- Content & Table --- */
+        .content { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        
+        h1 { 
+            font-weight: 600; margin-bottom: 30px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .table-container { 
+            background: rgba(255, 255, 255, 0.1); /* Light Glass */
+            backdrop-filter: blur(10px);
+            padding: 20px; border-radius: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 15px; color: rgba(255,255,255,0.8); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { background: rgba(255, 255, 255, 0.1); padding: 15px; vertical-align: middle; transition: 0.2s; color: #fff; }
+        
+        tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+        tr:hover td { background: rgba(255, 255, 255, 0.25); transform: scale(1.005); }
+
+        .status-badge { padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); }
+        .link-title { color: #fff; text-decoration: none; font-weight: 600; }
+        .link-title:hover { color: #00ff88; text-decoration: underline; text-shadow: 0 0 5px rgba(0,255,136,0.4); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
     </style>
 </head>
 <body>
 
+    <ul class="circles">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ul>
+
     <nav class="sidebar">
         <div class="sidebar-header">
-            Bug Tracker
+            <i class="fas fa-bug"></i> BugTracker
         </div>
         <ul class="sidebar-nav">
-            <li><a href="{{ url_for('index') }}">🏠 Home</a></li>
-            <li><a href="{{ url_for('assigned_tickets') }}" class="active">🎟️ Assigned Tickets</a></li>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+            
+            <li><a href="{{ url_for('assigned_tickets') }}" class="active"><i class="fas fa-ticket-alt"></i> Assigned Tickets</a></li>
             
             {% if current_user.role == 'Admin' %}
-            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
-            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            <li><a href="{{ url_for('user_management') }}"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}"><i class="fas fa-scroll"></i> System Logs</a></li>
             {% endif %}
         </ul>
     </nav>
 
     <div class="main-wrapper">
-    
         <header class="header">
-            <div class="user-info">
-                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
-                <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="user-badge">
+                <i class="fas fa-user-circle" style="margin-right: 8px; font-size: 1.2em;"></i>
+                {{ current_user.username }}
             </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </header>
 
         <main class="content">
-        
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 {% for category, message in messages %}
-                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                  <div class="alert alert-{{ category }}" style="background:rgba(255,255,255,0.2); padding:10px; margin-bottom:15px; border-radius:10px;">{{ message }}</div>
                 {% endfor %}
               {% endif %}
             {% endwith %}
 
             <h1>{{ page_title }}</h1>
             
-            <div class="card">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -76,31 +209,24 @@
                             <th>Status</th>
                             <th>Project</th>
                             <th>Reported By</th>
-                            <th>Created On</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ticket in tickets %}
                         <tr>
-                            <td class="link-purple">
-                                <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">
-                                    {{ ticket.title }}
-                                </a>
-                            </td>
-                            <td>{{ ticket.status }}</td>
+                            <td><a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" class="link-title">#{{ ticket.id }} - {{ ticket.title }}</a></td>
+                            <td><span class="status-badge">{{ ticket.status }}</span></td>
                             <td>{{ ticket.project.name }}</td>
                             <td>{{ ticket.author.username }}</td>
-                            <td>{{ ticket.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ ticket.created_at.strftime('%d %b %Y') }}</td>
                         </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="5">No tickets found.</td>
-                        </tr>
+                        <tr><td colspan="5" style="text-align:center; padding: 30px; opacity: 0.7;">No tickets assigned.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            
         </main>
     </div>
 
