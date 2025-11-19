@@ -4,56 +4,217 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ project.name }} - Tickets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7f6; display: flex; height: 100vh; }
-        .sidebar { width: 240px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; font-size: 1.5em; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar-nav { flex-grow: 1; list-style: none; padding: 20px 0; margin: 0; }
-        .sidebar-nav li { margin: 0; }
-        .sidebar-nav a { display: block; padding: 15px 20px; text-decoration: none; color: #ecf0f1; transition: background 0.2s; }
-        .sidebar-nav a:hover, .sidebar-nav a.active { background: #34495e; color: #ffffff; }
-        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .header { background: #ffffff; padding: 15px 30px; border-bottom: 1px solid #ddd; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .user-info { color: #555; }
-        .user-info a { color: #e74c3c; text-decoration: none; margin-left: 15px; font-weight: bold; }
-        .content { padding: 30px; flex-grow: 1; }
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .bug-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #fdfdfd; }
-        .bug-card h3 { margin-top: 0; color: #6f42c1; } /* Purple link */
-        .bug-card .status { font-style: italic; color: #555; font-size: 0.9em; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], textarea { width: 95%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
-        button, .btn { background: #007BFF; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-info { background: #d1ecf1; color: #0c5460; }
-        /* Add this to the <style> block in project_detail.html */
-        .link-purple a {
-        color: #6f42c1;
-        font-weight: bold;
-        text-decoration: none;
-    }
-        .link-purple a:hover {
-            text-decoration: underline;
+        /* --- Reset & Base Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            height: 100vh; 
+            overflow: hidden;
+            display: flex;
         }
-        /* Add modal styles if you plan to use a modal for new tickets */
+
+        /* --- Animated Background --- */
+        .circles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1;
+        }
+        .circles li {
+            position: absolute; display: block; list-style: none;
+            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
+        }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        
+        @keyframes animate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        /* --- SIDEBAR (Consistent) --- */
+        .sidebar { 
+            width: 280px; 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; flex-direction: column; 
+            z-index: 10;
+            padding-top: 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header { 
+            padding: 20px 30px; 
+            font-size: 1.8rem; font-weight: 700; 
+            color: #fff;
+            display: flex; align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-header i { color: #00ff88; margin-right: 15px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.5)); }
+        
+        .sidebar-nav { list-style: none; padding: 0 15px; }
+        .sidebar-nav li { margin-bottom: 10px; }
+        
+        .sidebar-nav a { 
+            display: flex; align-items: center;
+            padding: 14px 20px; 
+            text-decoration: none; 
+            color: rgba(255, 255, 255, 0.8); 
+            font-weight: 500;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .sidebar-nav a i { width: 24px; margin-right: 12px; font-size: 1.1em; transition: 0.3s; }
+
+        .sidebar-nav a:hover { 
+            background: rgba(0, 255, 136, 0.15); color: #00ff88; transform: translateX(5px);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+        .sidebar-nav a:hover i { transform: scale(1.1); color: #00ff88; }
+
+        .sidebar-nav a.active { 
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.05) 100%);
+            color: #fff; border-left: 4px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        .sidebar-nav a.active i { color: #00ff88; filter: drop-shadow(0 0 5px rgba(0,255,136,0.6)); }
+
+        /* --- Main Layout --- */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { 
+            padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px; border-radius: 30px; margin-right: 15px; display: flex; align-items: center;
+        }
+        .logout-btn { 
+            color: #ff6b6b; text-decoration: none; padding: 8px 20px; font-weight: 600;
+            border: 1px solid rgba(255, 107, 107, 0.5); border-radius: 30px; transition: 0.3s; 
+        }
+        .logout-btn:hover { background: #ff6b6b; color: white; box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+
+        /* --- Content Area --- */
+        .content { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        
+        h1 { font-weight: 600; margin-bottom: 10px; font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .project-desc { color: rgba(255,255,255,0.7); margin-bottom: 30px; font-size: 1rem; }
+
+        /* --- Glass Form (Submit Ticket) --- */
+        .form-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-card h2 { color: #00ff88; font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #ddd; }
+        
+        input[type="text"], textarea { 
+            width: 100%; padding: 12px; 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 10px; color: #fff;
+            outline: none; transition: 0.3s; font-family: 'Poppins', sans-serif;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #00ff88; background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 10px rgba(0,255,136,0.1);
+        }
+
+        button {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            color: white; padding: 12px 25px; border: none; border-radius: 30px;
+            cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.3s;
+            margin-top: 15px; box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 239, 125, 0.5); }
+
+        /* --- Ticket List --- */
+        .section-title { font-size: 1.5rem; margin-bottom: 20px; display: flex; align-items: center; }
+        .section-title span { background: #00ff88; color: #000; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold; }
+
+        .bug-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+        .bug-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px; border-radius: 15px;
+            transition: 0.3s;
+            border-left: 4px solid #00ff88; /* Green accent line */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .bug-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .bug-card h3 { margin: 0 0 10px 0; font-size: 1.1rem; }
+        .bug-card h3 a { color: #fff; text-decoration: none; transition: 0.2s; }
+        .bug-card h3 a:hover { color: #00ff88; }
+
+        .bug-desc { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 15px; flex-grow: 1; }
+
+        .bug-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem; color: rgba(255,255,255,0.5);
+        }
+        
+        .status-badge {
+            background: rgba(0, 255, 136, 0.2); color: #00ff88;
+            padding: 4px 10px; border-radius: 8px; font-weight: 500;
+            border: 1px solid rgba(0,255,136,0.2);
+        }
+
+        /* Flash Alerts */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        .alert-success { background: rgba(46, 204, 113, 0.8); border-left: 5px solid #27ae60; }
+        .alert-danger { background: rgba(231, 76, 60, 0.8); border-left: 5px solid #c0392b; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
     </style>
 </head>
 <body>
 
+    <ul class="circles">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ul>
+
     <nav class="sidebar">
         <div class="sidebar-header">
-            Bug Tracker
+            <i class="fas fa-bug"></i> BugTracker
         </div>
         <ul class="sidebar-nav">
-            <li><a href="{{ url_for('index') }}" class="active">🏠 Home</a></li>
-            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}"><i class="fas fa-ticket-alt"></i> Assigned Tickets</a></li>
             
             {% if current_user.role == 'Admin' %}
-            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
-            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            <li><a href="{{ url_for('user_management') }}"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}"><i class="fas fa-scroll"></i> System Logs</a></li>
             {% endif %}
         </ul>
     </nav>
@@ -61,10 +222,11 @@
     <div class="main-wrapper">
     
         <header class="header">
-            <div class="user-info">
-                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
-                <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="user-badge">
+                <i class="fas fa-user-circle" style="margin-right: 8px; font-size: 1.2em;"></i>
+                {{ current_user.username }} <small style="margin-left:5px; opacity:0.7">({{ current_user.role }})</small>
             </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </header>
 
         <main class="content">
@@ -77,43 +239,49 @@
               {% endif %}
             {% endwith %}
 
-            <h1>Project: {{ project.name }}</h1>
-            <p>{{ project.description }}</p>
+            <h1><i class="fas fa-folder-open" style="color:#00ff88; margin-right:10px;"></i>{{ project.name }}</h1>
+            <p class="project-desc">{{ project.description }}</p>
             
-            <div class="card">
-                <h2>Submit a New Ticket</h2>
+            <div class="form-card">
+                <h2><i class="fas fa-plus-circle"></i> Submit a New Ticket</h2>
                 <form action="{{ url_for('project_detail', project_id=project.id) }}" method="POST">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" name="title" required>
                     
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description" rows="3"></textarea>
+                    <label for="title">Ticket Title</label>
+                    <input type="text" id="title" name="title" placeholder="What's the issue?" required>
                     
-                    <button type="submit">Submit Ticket</button>
+                    <label for="description" style="margin-top: 15px;">Description</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Describe the bug in detail..."></textarea>
+                    
+                    <button type="submit">Submit Ticket <i class="fas fa-paper-plane" style="margin-left:5px;"></i></button>
                 </form>
             </div>
             
-            <div class="card">
-                <h2>Tickets</h2>
-                <div class="bug-list">
-                    {% for ticket in tickets %}
-                        <div class="bug-card">
-                            <h3 class="link-purple">
+            <h2 class="section-title">Project Tickets <span>{{ tickets|length }}</span></h2>
+            
+            <div class="bug-list">
+                {% for ticket in tickets %}
+                    <div class="bug-card">
+                        <div>
+                            <h3>
                                 <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">
-                                    {{ ticket.title }}
+                                    #{{ ticket.id }} - {{ ticket.title }}
                                 </a>
                             </h3>
-                            <p>{{ ticket.description }}</p>
-                            <p class="status">
-                                <strong>Status:</strong> {{ ticket.status }} | 
-                                <strong>Reported by:</strong> {{ ticket.author.username }} |
-                                <strong>On:</strong> {{ ticket.created_at.strftime('%Y-%m-%d') }}
-                            </p>
+                            <p class="bug-desc">{{ ticket.description }}</p>
                         </div>
-                    {% else %}
-                        <p>No tickets found for this project.</p>
-                    {% endfor %}
-                </div>
+                        
+                        <div class="bug-footer">
+                            <span class="status-badge">{{ ticket.status }}</span>
+                            <span><i class="fas fa-user"></i> {{ ticket.author.username }}</span>
+                            <span><i class="far fa-clock"></i> {{ ticket.created_at.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: rgba(255,255,255,0.05); border-radius: 15px;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #00ff88; opacity: 0.5; margin-bottom: 10px;"></i>
+                        <p style="color: rgba(255,255,255,0.6);">No tickets found for this project. Good job!</p>
+                    </div>
+                {% endfor %}
             </div>
             
         </main>

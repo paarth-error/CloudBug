@@ -3,179 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Cloud Bug Tracker</title>
+    <title>Dashboard - BugTracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f7f6;
-            display: flex;
-            height: 100vh;
-        }
+        /* --- Reset & Base Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* --- Sidebar --- */
-        .sidebar {
-            width: 240px;
-            background: #2c3e50;
-            color: white;
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            /* CONSISTENT BACKGROUND */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            height: 100vh; 
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        .sidebar-header {
-            padding: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 1px solid #34495e;
-        }
-        .sidebar-nav {
-            flex-grow: 1;
-            list-style: none;
-            padding: 20px 0;
-            margin: 0;
-        }
-        .sidebar-nav li {
-            margin: 0;
-        }
-        .sidebar-nav a {
-            display: block;
-            padding: 15px 20px;
-            text-decoration: none;
-            color: #ecf0f1;
-            transition: background 0.2s;
-        }
-        .sidebar-nav a:hover, .sidebar-nav a.active {
-            background: #34495e;
-            color: #ffffff;
-        }
-        
-        /* --- Main Content Wrapper --- */
-        .main-wrapper {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto; /* Allows content to scroll */
         }
 
-        /* --- Top Header --- */
-        .header {
-            background: #ffffff;
-            padding: 15px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        /* --- Background Animation --- */
+        .circles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1;
         }
-        .user-info {
-            color: #555;
+        .circles li {
+            position: absolute; display: block; list-style: none;
+            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
         }
-        .user-info a {
-            color: #e74c3c;
-            text-decoration: none;
-            margin-left: 15px;
-            font-weight: bold;
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        
+        @keyframes animate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
         }
 
-        /* --- Page Content --- */
-        .content {
-            padding: 30px;
-            flex-grow: 1;
+        /* --- SIDEBAR (Consistent) --- */
+        .sidebar { 
+            width: 280px; 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; flex-direction: column; 
+            z-index: 10;
+            padding-top: 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
         }
-        
-        /* --- Re-styled Components --- */
-        h1, h2 {
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-        }
-        .bug-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            background: #fdfdfd;
-        }
-        .bug-card h3 {
-            margin-top: 0;
-            color: #007BFF; /* Link color from your plan */
-        }
-        .bug-card .status {
-            font-style: italic;
-            color: #555;
-            font-size: 0.9em;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], textarea {
-            width: calc(100% - 20px); /* Adjust for padding */
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        button {
-            background: #007BFF;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        
-        /* --- Flash Messages --- */
-        .alert {
-            padding: 15px;
+
+        .sidebar-header { 
+            padding: 20px 30px; 
+            font-size: 1.8rem; font-weight: 700; 
+            color: #fff;
+            display: flex; align-items: center;
             margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 1.1em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-info { background: #d1ecf1; color: #0c5460; }
+        .sidebar-header i { color: #00ff88; margin-right: 15px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.5)); }
+        
+        .sidebar-nav { list-style: none; padding: 0 15px; }
+        .sidebar-nav li { margin-bottom: 10px; }
+        
+        .sidebar-nav a { 
+            display: flex; align-items: center;
+            padding: 14px 20px; 
+            text-decoration: none; 
+            color: rgba(255, 255, 255, 0.8); 
+            font-weight: 500;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .sidebar-nav a i { width: 24px; margin-right: 12px; font-size: 1.1em; transition: 0.3s; }
+
+        /* Hover & Active States */
+        .sidebar-nav a:hover { 
+            background: rgba(0, 255, 136, 0.15); color: #00ff88; transform: translateX(5px);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+        .sidebar-nav a:hover i { transform: scale(1.1); color: #00ff88; }
+
+        .sidebar-nav a.active { 
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.05) 100%);
+            color: #fff; border-left: 4px solid #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+        .sidebar-nav a.active i { color: #00ff88; filter: drop-shadow(0 0 5px rgba(0,255,136,0.6)); }
+
+        /* --- Main Layout --- */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { 
+            padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 20px; border-radius: 30px; margin-right: 15px; display: flex; align-items: center;
+        }
+        .logout-btn { 
+            color: #ff6b6b; text-decoration: none; padding: 8px 20px; font-weight: 600;
+            border: 1px solid rgba(255, 107, 107, 0.5); border-radius: 30px; transition: 0.3s; 
+        }
+        .logout-btn:hover { background: #ff6b6b; color: white; box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+
+        /* --- Content Area --- */
+        .content { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        
+        h1 { font-weight: 600; margin-bottom: 30px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        h2 { font-weight: 500; margin: 0; font-size: 1.3rem; color: #00ff88; }
+
+        /* --- Glass Cards --- */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
+        }
+
+        /* --- Buttons --- */
+        .btn-glow {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            color: white; padding: 10px 20px; border: none; border-radius: 30px;
+            cursor: pointer; font-weight: 600; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 239, 125, 0.5); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1); color: #fff; padding: 6px 15px;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+
+        /* --- Table --- */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 15px; color: rgba(255,255,255,0.7); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { background: rgba(255, 255, 255, 0.05); padding: 15px; vertical-align: middle; color: #fff; }
+        
+        tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+        tr:hover td { background: rgba(255, 255, 255, 0.15); }
+
+        .link-project { color: #fff; font-weight: 600; text-decoration: none; }
+        .link-project:hover { color: #00ff88; text-decoration: underline; }
+
+        /* --- MODAL STYLES (Glass Effect) --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .modal-content { 
+            background: rgba(40, 40, 60, 0.9); 
+            margin: 8% auto; padding: 30px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            width: 90%; max-width: 500px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            color: white;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
+
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .close-btn:hover { color: #ff6b6b; }
+
+        /* Modal Inputs */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #ccc; }
+        
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 12px; 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 10px; color: #fff;
+            outline: none; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #00ff88; background: rgba(255,255,255,0.15);
+        }
+        .form-group select option { background: #333; color: white; }
+        .form-group small { color: rgba(255,255,255,0.5); font-size: 0.8rem; }
+
+        /* Flash Alerts */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        .alert-success { background: rgba(46, 204, 113, 0.8); border-left: 5px solid #27ae60; }
+        .alert-danger { background: rgba(231, 76, 60, 0.8); border-left: 5px solid #c0392b; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
     </style>
 </head>
 <body>
 
+    <ul class="circles">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ul>
+
     <nav class="sidebar">
         <div class="sidebar-header">
-            Bug Tracker
+            <i class="fas fa-bug"></i> BugTracker
         </div>
         <ul class="sidebar-nav">
-            <li><a href="{{ url_for('index') }}" class="active">🏠 Home</a></li>
-            <li><a href="{{ url_for('assigned_tickets') }}">🎟️ Assigned Tickets</a></li>
+            <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('assigned_tickets') }}"><i class="fas fa-ticket-alt"></i> Assigned Tickets</a></li>
             
             {% if current_user.role == 'Admin' %}
-            <li><a href="{{ url_for('user_management') }}">👥 User Management</a></li>
-            <li><a href="{{ url_for('system_logs') }}">📜 System Logs</a></li>
+            <li><a href="{{ url_for('user_management') }}"><i class="fas fa-users"></i> User Management</a></li>
+            <li><a href="{{ url_for('system_logs') }}"><i class="fas fa-scroll"></i> System Logs</a></li>
             {% endif %}
-            
         </ul>
     </nav>
 
     <div class="main-wrapper">
     
         <header class="header">
-            <div class="user-info">
-                Logged in as: <strong>{{ current_user.username }} ({{ current_user.role }})</strong>
-                <a href="{{ url_for('logout') }}">Logout</a>
+            <div class="user-badge">
+                <i class="fas fa-user-circle" style="margin-right: 8px; font-size: 1.2em;"></i>
+                {{ current_user.username }} <small style="margin-left:5px; opacity:0.7">({{ current_user.role }})</small>
             </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </header>
 
         <main class="content">
@@ -188,13 +244,13 @@
               {% endif %}
             {% endwith %}
         
-            <h1>Project Dashboard</h1>
+            <h1><i class="fas fa-chart-pie" style="margin-right:10px; color:#00ff88;"></i>Project Dashboard</h1>
             
             <div class="card">
                 <div class="card-header">
-                    <h2>Projects</h2>
+                    <h2><i class="fas fa-folder-open"></i> Your Projects</h2>
                     {% if current_user.role == 'Admin' %}
-                    <button class="btn btn-primary" onclick="openModal()">New Project</button>
+                    <button class="btn-glow" onclick="openModal()"><i class="fas fa-plus"></i> New Project</button>
                     {% endif %}
                 </div>
                 
@@ -211,19 +267,19 @@
                         {% for project in projects %}
                         <tr>
                             <td>
-                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="link-purple">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="link-project">
                                     {{ project.name }}
                                 </a>
                             </td>
-                            <td>{{ project.description }}</td>
-                            <td>{{ project.team|length }} members</td>
+                            <td style="opacity: 0.8;">{{ project.description }}</td>
+                            <td><i class="fas fa-users"></i> {{ project.team|length }} members</td>
                             <td>
-                                <button class="btn-secondary">Details</button>
+                                <button class="btn-secondary">Details <i class="fas fa-arrow-right" style="font-size:0.8em; margin-left:5px;"></i></button>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4">No projects found.</td>
+                            <td colspan="4" style="text-align: center; padding: 30px; opacity: 0.6;">No projects found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -231,8 +287,13 @@
             </div>
             
             <div class="card">
-                <h2>Ticket Statistics</h2>
-                <p>(Lower part: Ticket related statistics will go here)</p>
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-bar"></i> Ticket Statistics</h2>
+                </div>
+                <div style="text-align:center; padding: 40px; border: 2px dashed rgba(255,255,255,0.1); border-radius: 10px; color: rgba(255,255,255,0.5);">
+                    <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 10px;"></i><br>
+                    Analytics & Charts Coming Soon
+                </div>
             </div>
         
         </main>
@@ -241,53 +302,31 @@
         <div id="newProjectModal" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal()">&times;</span>
-                <h2>Create New Project</h2>
+                <h2 style="margin-bottom: 20px; color: #fff;">Create New Project</h2>
+                
                 <form action="{{ url_for('create_project') }}" method="POST">
                     <div class="form-group">
-                        <label for="name">Project Name:</label>
-                        <input type="text" id="name" name="name" required>
+                        <label for="name">Project Name</label>
+                        <input type="text" id="name" name="name" placeholder="e.g. Website Redesign" required>
                     </div>
                     <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description" rows="3"></textarea>
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Project details..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="team_members">Assign Team:</label>
+                        <label for="team_members">Assign Team</label>
                         <select id="team_members" name="team_members" multiple size="5">
                             {% for user in all_users %}
                                 <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
                             {% endfor %}
                         </select>
-                        <small>Hold Ctrl/Cmd to select multiple users.</small>
+                        <small><i class="fas fa-info-circle"></i> Hold Ctrl/Cmd to select multiple users.</small>
                     </div>
-                    <button type="submit" class="btn btn-primary">Create Project</button>
+                    <button type="submit" class="btn-glow" style="width:100%">Create Project</button>
                 </form>
             </div>
         </div>
         {% endif %}
-        
-        
-        <style>
-            .card-header { display: flex; justify-content: space-between; align-items: center; }
-            .btn { padding: 8px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.9em; }
-            .btn-primary { background: #007BFF; color: white; }
-            .btn-secondary { background: #6c757d; color: white; }
-            .link-purple { color: #6f42c1; font-weight: bold; text-decoration: none; }
-            .link-purple:hover { text-decoration: underline; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-            th { background-color: #f9f9f9; }
-            
-            /* --- Modal Styles --- */
-            .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
-            .modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; }
-            .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-            .close-btn:hover, .close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
-            .form-group { margin-bottom: 15px; }
-            .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-            .form-group input, .form-group textarea, .form-group select { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-            .form-group select[multiple] { height: 120px; }
-        </style>
         
         <script>
             function openModal() {
@@ -302,3 +341,8 @@
                 }
             }
         </script>
+
+    </div>
+
+</body>
+</html>
