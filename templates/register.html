@@ -1,23 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-R">
-    <title>Register - Bug Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - BugTracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: Arial, sans-serif; display: grid; place-items: center; min-height: 100vh; background: #f4f4f4; }
-        .form-container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; background: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-        p { text-align: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Same background as login for consistency */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Animated Background Circles */
+        .circles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .circles li {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            animation: animate 25s linear infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .circles li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .circles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+
+        @keyframes animate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        /* Glassmorphism Card */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Branding */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .brand-header i {
+            font-size: 3rem;
+            color: #00ff88; /* Slightly greener for Register page to differentiate */
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        .brand-header h2 {
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        .brand-header span {
+            font-size: 0.9rem;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        /* Input Fields */
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ddd;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px 12px 12px 45px; /* Space for icon */
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        input:focus + i {
+            color: #00ff88;
+        }
+
+        /* Register Button */
+        button {
+            width: 100%;
+            /* Greenish gradient for Registration */
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+        }
+
+        /* Footer */
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        .footer-text a {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .alert-danger { background: rgba(255, 99, 71, 0.8); color: white; border: 1px solid red; }
+        .alert-success { background: rgba(46, 204, 113, 0.8); color: white; border: 1px solid green; }
+
     </style>
 </head>
 <body>
+
+    <ul class="circles">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ul>
+
     <div class="form-container">
-        <h2>Register</h2>
+        
+        <div class="brand-header">
+            <i class="fas fa-bug"></i>
+            <h2>BugTracker</h2>
+            <span>Create New Account</span>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -26,25 +211,32 @@
             {% endfor %}
           {% endif %}
         {% endwith %}
-        
+
         <form method="POST" action="{{ url_for('register') }}">
+            
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" placeholder="Choose Username" required>
+                <i class="fas fa-user"></i>
             </div>
+
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" placeholder="Email Address" required>
+                <i class="fas fa-envelope"></i>
             </div>
+            
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" placeholder="Create Password" required>
+                <i class="fas fa-lock"></i>
             </div>
-            <button type="submit">Register</button>
+            
+            <button type="submit">REGISTER</button>
         </form>
-        <p>
-            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+
+        <p class="footer-text">
+            Already have an account? <br> 
+            <a href="{{ url_for('login') }}">Login here</a>
         </p>
     </div>
+
 </body>
 </html>
